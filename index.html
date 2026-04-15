@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Talks Event Schedule</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            width: 90%;
+            max-width: 960px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #0056b3;
+            text-align: center;
+        }
+        .search-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .search-container input {
+            width: 70%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .schedule-item {
+            background: #e9ecef;
+            border-left: 5px solid #0056b3;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .schedule-item.talk {
+            border-left-color: #28a745;
+        }
+        .schedule-item.lunch {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            text-align: center;
+            font-weight: bold;
+        }
+        .schedule-item h3 {
+            margin-top: 0;
+            color: #28a745;
+        }
+        .schedule-item p {
+            margin: 5px 0;
+        }
+        .schedule-item .speakers, .schedule-item .categories {
+            font-size: 0.9em;
+            color: #555;
+        }
+        .schedule-item .categories span {
+            background: #007bff;
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-right: 5px;
+            display: inline-block;
+            margin-bottom: 3px;
+        }
+        .time {
+            font-weight: bold;
+            color: #0056b3;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+            color: #777;
+            font-size: 0.9em;
+        }
+        @media (max-width: 600px) {
+            .container {
+                width: 95%;
+                margin: 10px auto;
+                padding: 10px;
+            }
+            .search-container input {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Technical Talks Event - Schedule</h1>
+
+        <div class="search-container">
+            <input type="text" id="categorySearch" placeholder="Search by category (e.g., AI, Web)...">
+        </div>
+
+        <div id="schedule">
+            <!-- Schedule items will be rendered here by JavaScript -->
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Tech Talks Event. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const talksData = [
+            {
+                title: "Introduction to Quantum Computing",
+                speakers: ["Dr. Alice Quantum"],
+                categories: ["Quantum", "AI", "Future Tech"],
+                duration: 60,
+                description: "An overview of the basics of quantum computing, its potential, and current challenges."
+            },
+            {
+                title: "Advanced Web Performance Optimization",
+                speakers: ["Bob Frontend", "Charlie Dev"],
+                categories: ["Web Development", "Performance"],
+                duration: 60,
+                description: "Deep dive into modern techniques for optimizing web application performance."
+            },
+            {
+                title: "Securing Cloud Native Applications",
+                speakers: ["Diana Security"],
+                categories: ["Cloud", "Security", "DevOps"],
+                duration: 60,
+                description: "Best practices and tools for ensuring the security of applications deployed in cloud-native environments."
+            },
+            {
+                title: "Machine Learning in Production",
+                speakers: ["Eve MLops"],
+                categories: ["AI", "Machine Learning", "DevOps"],
+                duration: 60,
+                description: "Strategies and pitfalls when deploying and managing machine learning models in production."
+            },
+            {
+                title: "The Future of JavaScript Frameworks",
+                speakers: ["Frank JS"],
+                categories: ["Web Development", "JavaScript", "Frameworks"],
+                duration: 60,
+                description: "A look at emerging trends and predictions for the next generation of JavaScript frameworks."
+            },
+            {
+                title: "Data Streaming with Apache Kafka",
+                speakers: ["Grace Data"],
+                categories: ["Data Engineering", "Big Data"],
+                duration: 60,
+                description: "Understanding Kafka's architecture and how to build scalable data streaming pipelines."
+            }
+        ];
+
+        const eventConfig = {
+            startTime: "10:00", // HH:MM format
+            talkDuration: 60,   // minutes
+            transitionTime: 10, // minutes between talks
+            lunchBreakDuration: 60 // minutes
+        };
+
+        function addMinutes(time, minutesToAdd) {
+            const [hours, mins] = time.split(':').map(Number);
+            const date = new Date();
+            date.setHours(hours, mins + minutesToAdd, 0, 0);
+            return date.toTimeString().slice(0, 5);
+        }
+
+        function generateSchedule(talks) {
+            const schedule = [];
+            let currentTime = eventConfig.startTime;
+            let talkIndex = 0;
+
+            for (let i = 0; i < talks.length + 1; i++) { // +1 for lunch break
+                if (i === Math.floor(talks.length / 2)) { // Insert lunch roughly in the middle
+                    schedule.push({
+                        type: "lunch",
+                        title: "Lunch Break",
+                        time: `${currentTime} - ${addMinutes(currentTime, eventConfig.lunchBreakDuration)}`,
+                        description: "Enjoy your meal and networking!",
+                        duration: eventConfig.lunchBreakDuration
+                    });
+                    currentTime = addMinutes(currentTime, eventConfig.lunchBreakDuration);
+                    
+                    // Add transition after lunch if there are more talks
+                    if (talkIndex < talks.length) {
+                        schedule.push({
+                            type: "transition",
+                            title: "Transition",
+                            time: `${currentTime} - ${addMinutes(currentTime, eventConfig.transitionTime)}`,
+                            duration: eventConfig.transitionTime
+                        });
+                        currentTime = addMinutes(currentTime, eventConfig.transitionTime);
+                    }
+                }
+
+                if (talkIndex < talks.length) {
+                    const talk = talks[talkIndex];
+                    schedule.push({
+                        type: "talk",
+                        ...talk,
+                        time: `${currentTime} - ${addMinutes(currentTime, talk.duration)}`
+                    });
+                    currentTime = addMinutes(currentTime, talk.duration);
+
+                    if (talkIndex < talks.length - 1) { // Add transition between talks
+                        schedule.push({
+                            type: "transition",
+                            title: "Transition",
+                            time: `${currentTime} - ${addMinutes(currentTime, eventConfig.transitionTime)}`,
+                            duration: eventConfig.transitionTime
+                        });
+                        currentTime = addMinutes(currentTime, eventConfig.transitionTime);
+                    }
+                    talkIndex++;
+                }
+            }
+            return schedule;
+        }
+
+        function renderSchedule(filteredTalks = talksData) {
+            const fullSchedule = generateSchedule(filteredTalks);
+            const scheduleDiv = document.getElementById("schedule");
+            scheduleDiv.innerHTML = ""; // Clear previous schedule
+
+            fullSchedule.forEach(item => {
+                const itemDiv = document.createElement("div");
+                itemDiv.classList.add("schedule-item");
+
+                if (item.type === "talk") {
+                    itemDiv.classList.add("talk");
+                    itemDiv.innerHTML = `
+                        <p class="time">${item.time}</p>
+                        <h3>${item.title}</h3>
+                        <p class="speakers"><strong>Speakers:</strong> ${item.speakers.join(", ")}</p>
+                        <p class="categories">
+                            <strong>Categories:</strong>
+                            ${item.categories.map(cat => `<span>${cat}</span>`).join("")}
+                        </p>
+                        <p>${item.description}</p>
+                    `;
+                } else if (item.type === "lunch") {
+                    itemDiv.classList.add("lunch");
+                    itemDiv.innerHTML = `
+                        <p class="time">${item.time}</p>
+                        <h2>${item.title}</h2>
+                        <p>${item.description}</p>
+                    `;
+                } else if (item.type === "transition") {
+                     // Transitions are not displayed as separate blocks for simplicity in the UI
+                     // They are implicitly handled by the timing.
+                     // If you wish to display them, uncomment below and adjust CSS
+                    /*
+                    itemDiv.innerHTML = `
+                        <p class="time">${item.time}</p>
+                        <p><strong>${item.title}</strong></p>
+                    `;
+                    */
+                }
+                if (item.type !== "transition") { // Only append actual talks and lunch breaks
+                    scheduleDiv.appendChild(itemDiv);
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderSchedule(); // Initial render
+
+            const categorySearchInput = document.getElementById("categorySearch");
+            categorySearchInput.addEventListener("keyup", (event) => {
+                const searchTerm = event.target.value.toLowerCase();
+                const filteredTalks = talksData.filter(talk =>
+                    talk.categories.some(category => category.toLowerCase().includes(searchTerm))
+                );
+                renderSchedule(filteredTalks);
+            });
+        });
+    </script>
+</body>
+</html>
